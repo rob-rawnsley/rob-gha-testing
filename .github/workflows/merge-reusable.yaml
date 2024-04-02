@@ -1,0 +1,75 @@
+name: Merge
+
+on:
+  workflow_call:
+    inputs:
+      deploy_to_dev:
+        default: true
+        description: 'Deploy to Dev environment?'
+        required: false
+        type: boolean
+      e2e_test:
+        default: true
+        description: 'Run E2E Tests?'
+        required: false
+        type: boolean
+      reset_db:
+        default: true
+        description: 'Reset DB before E2E Tests?'
+        required: false
+        type: boolean
+
+jobs:
+  build-test:
+    name: Build Test Push
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Build
+      run: make ci-build
+
+    - name: Lint
+      run: make ci-lint
+
+    - name: Unit Tests
+      run: make ci-unit-test
+
+    - name: Race Condition Test
+      run: make ci-race-test
+
+    - name: Integration Tests
+      run: make ci-integration-test
+
+    - name: Push Docker Images
+      run: echo 'Push Docker Images'
+
+  deploy:
+    if: ${{ inputs.deploy_to_dev }}
+    name: Deploy To Dev
+    needs: build-test
+    uses: rob-rawnsley/rob-gha-testing/.github/workflows/deploy-reusable.yaml@main
+    with:
+      environment: development
+      region: us-east-1
+      version: latest
+
+  e2e-test:
+    if: ${{ inputs.e2e_test }}
+    name: End To End Test
+    needs: deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Reset DB
+      if: ${{ inputs.reset_db }}
+      run: echo 'Reset DB'
+
+    - name: End To End Tests
+      run: make ci-e2e-test
+

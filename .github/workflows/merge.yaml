@@ -1,0 +1,25 @@
+name: Merge Pull Request
+
+on:
+  # Trigger manually and on pull request merge to default branch
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+    inputs:
+      deploy_to_dev:
+        default: true
+        description: 'Deploy to Dev environment?'
+        required: true
+        type: boolean
+
+        
+jobs:
+  merge:
+    name: Merge
+    uses: rob-rawnsley/rob-gha-testing/.github/workflows/merge-reusable.yaml@main
+    with:
+      deploy_to_dev: ${{ github.event.inputs.deploy_to_dev || true }}
+      e2e_test: true
+      reset_db: true
