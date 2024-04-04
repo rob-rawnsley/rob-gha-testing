@@ -15,6 +15,21 @@ on:
         description: 'Version to deploy'
         required: true
         type: string
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        type: environment
+      region:
+        description: 'Region to deploy to'
+        options: ['us-east-1', 'us-west-2']
+        required: true
+        type: choice
+      version:
+        description: 'Version to deploy'
+        required: true
+        type: string
 
 jobs:
   validate:
@@ -37,6 +52,8 @@ jobs:
         echo 'Plan - ${{ inputs.environment }} ${{ inputs.region }}'
 
   apply:
+    environment:
+      name: ${{ inputs.environment }}
     name: Apply
     needs: plan
     runs-on: ubuntu-latest
