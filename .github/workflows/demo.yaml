@@ -1,0 +1,20 @@
+name: Demo
+run-name: 'Demo: ${{ inputs.demo_value }} by @${{ github.actor }}'
+
+on:
+  workflow_dispatch:
+    inputs:
+      demo_value:
+        description: 'Enter any string'
+        required: true
+        type: string
+
+jobs:
+  demo:
+    name: Run the demo
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Validate
+      run: |
+        echo 'Demo: ${{ inputs.demo_value }}'
